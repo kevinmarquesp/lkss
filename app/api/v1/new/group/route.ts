@@ -26,6 +26,8 @@ export async function POST(req: Request) {
     return Response.json(result);
 
   } catch (error) {
+    console.error(error);
+
     const errorStringfied = JSON.stringify(error, Object.getOwnPropertyNames(error));
     const errorObject = JSON.parse(errorStringfied);
 
