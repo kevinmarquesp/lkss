@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { linksTable } from "@/db/schema";
+import { groupsTable, linksTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -12,11 +12,12 @@ const paramsValidator = z.object({
 
 type Params = z.infer<typeof paramsValidator>;
 
-export async function GET(_req: Request, { params }: {
+export async function GET(req: Request, { params }: {
   params: Promise<Params>
 }) {
   try {
     const result = await get({
+      origin: new URL(req.url).origin,
       params: paramsValidator.parse(await params),
     });
 
@@ -36,19 +37,36 @@ export async function GET(_req: Request, { params }: {
 }
 
 async function get(props: {
+  origin: string;
   params: Params;
 }) {
-  const findLinkResults = await db
+  const findGroupResults = await db
+    .select()
+    .from(groupsTable)
+    .where(eq(groupsTable.id, props.params.id));
+
+  if (findGroupResults.length === 0) {
+    throw new Error("Group not found");
+  }
+
+  const findGroupChildLinksResults = await db
     .select({
-      target: linksTable.target,
+      id: linksTable.id,
       createdAt: linksTable.createdAt,
     })
     .from(linksTable)
-    .where(eq(linksTable.id, props.params.id));
+    .where(eq(linksTable.groupId, props.params.id));
 
-  if (!findLinkResults[0]) {
-    throw new Error("Link not found");
+  if (findGroupChildLinksResults.length === 0) {
+    throw new Error("Unexpected: Group with no childs");
   }
 
-  return findLinkResults[0];
+  return {
+    ...findGroupResults[0],
+    url: `${props.origin}/${findGroupResults[0].id}`,
+    links: findGroupChildLinksResults.map((link) => ({
+      ...link,
+      url: `${props.origin}/${link.id}`,
+    })),
+  };
 }
