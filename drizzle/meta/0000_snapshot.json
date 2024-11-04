@@ -1,0 +1,119 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "6724a06c-3c71-4185-afe7-b66853726bd1",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "Groups": {
+      "name": "Groups",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(8)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Link groups'"
+        }
+      },
+      "indexes": {
+        "Groups_id_unique": {
+          "name": "Groups_id_unique",
+          "columns": [
+            "id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "Links": {
+      "name": "Links",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(8)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "groupId": {
+          "name": "groupId",
+          "type": "text(8)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "target": {
+          "name": "target",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "Links_id_unique": {
+          "name": "Links_id_unique",
+          "columns": [
+            "id"
+          ],
+          "isUnique": true
+        },
+        "Links_target_unique": {
+          "name": "Links_target_unique",
+          "columns": [
+            "target"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "Links_groupId_Groups_id_fk": {
+          "name": "Links_groupId_Groups_id_fk",
+          "tableFrom": "Links",
+          "tableTo": "Groups",
+          "columnsFrom": [
+            "groupId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
