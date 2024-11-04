@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6724a06c-3c71-4185-afe7-b66853726bd1",
+  "id": "06cfea1e-3d35-4879-aa01-0a0294f007c0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Groups": {
@@ -21,6 +21,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'Link groups'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {
@@ -75,13 +83,6 @@
           "name": "Links_id_unique",
           "columns": [
             "id"
-          ],
-          "isUnique": true
-        },
-        "Links_target_unique": {
-          "name": "Links_target_unique",
-          "columns": [
-            "target"
           ],
           "isUnique": true
         }

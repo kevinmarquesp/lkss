@@ -6,12 +6,13 @@ import { z } from "zod";
 export const groupsTable = sqliteTable("Groups", {
   id: text({ length: 8 }).unique().notNull(),
   title: text().notNull().default("Link groups"),
+  createdAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const linksTable = sqliteTable("Links", {
   id: text({ length: 8 }).unique().notNull(),
   groupId: text({ length: 8 }).references(() => groupsTable.id),
-  target: text().unique().notNull(),
+  target: text().notNull(),
   createdAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
 

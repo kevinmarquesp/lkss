@@ -1,6 +1,7 @@
 CREATE TABLE `Groups` (
 	`id` text(8) NOT NULL,
-	`title` text DEFAULT 'Link groups' NOT NULL
+	`title` text DEFAULT 'Link groups' NOT NULL,
+	`createdAt` integer DEFAULT CURRENT_TIMESTAMP
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `Groups_id_unique` ON `Groups` (`id`);--> statement-breakpoint
@@ -12,5 +13,4 @@ CREATE TABLE `Links` (
 	FOREIGN KEY (`groupId`) REFERENCES `Groups`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `Links_id_unique` ON `Links` (`id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `Links_target_unique` ON `Links` (`target`);
+CREATE UNIQUE INDEX `Links_id_unique` ON `Links` (`id`);
