@@ -16,7 +16,6 @@ const patchedConfig = fixupConfigRules([...compat.extends("next/core-web-vitals"
 const config = [
   ...patchedConfig,
   {
-    ignores: [".next/*"],
     rules: {
       "comma-dangle": ["error", "always-multiline"],
       semi: ["error", "always"],
