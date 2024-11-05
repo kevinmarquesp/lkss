@@ -6,18 +6,21 @@ import { z } from "zod";
 export const groupsTable = sqliteTable("Groups", {
   id: text({ length: 8 }).unique().notNull(),
   title: text().notNull().default("Link groups"),
+  token: text({ length: 12 }).unique().notNull(),
+  updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
   createdAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
+  deletedAt: integer({ mode: "timestamp_ms" }),
 });
 
 export const linksTable = sqliteTable("Links", {
   id: text({ length: 8 }).unique().notNull(),
   groupId: text({ length: 8 }).references(() => groupsTable.id),
-  target: text().notNull(),
+  url: text().notNull(),
+  updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
   createdAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
+  deletedAt: integer({ mode: "timestamp_ms" }),
 });
 
 export const insertLinksSchema = createInsertSchema(linksTable, {
-  target: z
-    .string()
-    .url(),
+  url: z.string().url(),
 });
