@@ -40,7 +40,7 @@ async function get(props: {
 }) {
   const findTargetByLinkIdResults = await db
     .select({
-      target: linksTable.target,
+      target: linksTable.url,
     })
     .from(linksTable)
     .where(eq(linksTable.id, props.params.id));

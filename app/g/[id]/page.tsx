@@ -9,7 +9,7 @@ export default async function Page({ params }: {
 
   const groupChilds = await db
     .select({
-      target: linksTable.target,
+      target: linksTable.url,
     })
     .from(linksTable)
     .where(eq(linksTable.groupId, groupId));
