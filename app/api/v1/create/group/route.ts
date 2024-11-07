@@ -31,7 +31,7 @@ async function POST(request: NextRequest, { params }: { params: Promise<PostPara
 /**
  * Creates a new group and generate an access token for future editings, each
  * child will pass through the same logic as the `/api/xxx/create` route --
- * dealing with *dead* entries or reusing existing ones if `groupId` is `NULL`.
+ * it will reuse existing entries if `groupId` is `NULL`.
  */
 async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   params: PostParams;
@@ -50,7 +50,6 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
       title: groupsTable.title,
       token: groupsTable.token,
       updatedAt: groupsTable.updatedAt,
-      createdAt: groupsTable.createdAt,
     }))[0];
 
   let children = [];
@@ -63,8 +62,7 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
       .where(and(
         eq(linksTable.url, childUrl),
         isNull(linksTable.groupId),
-      ))
-      .orderBy(asc(linksTable.deletedAt));
+      ));
 
     // If any URL was found, create a new one and use it.
     if (linksFindByUrlResults.length === 0) {
@@ -78,29 +76,6 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
         .returning({
           id: linksTable.id,
           url: linksTable.url,
-          createdAt: linksTable.createdAt,
-          updatedAt: linksTable.updatedAt,
-        }))[0]);
-
-      continue;
-    }
-
-    const firstLinkRecord = linksFindByUrlResults[0];
-
-    // Restore a dead link if that's possible, to not waste disk space.
-    if (firstLinkRecord.deletedAt) {
-      children.push((await db
-        .update(linksTable)
-        .set({
-          groupId: group.id,
-          updatedAt: sql`CURRENT_TIMESTAMP`,
-          deletedAt: null,
-        })
-        .where(eq(linksTable.id, firstLinkRecord.id))
-        .returning({
-          id: linksTable.id,
-          url: linksTable.url,
-          createdAt: linksTable.createdAt,
           updatedAt: linksTable.updatedAt,
         }))[0]);
 
@@ -113,11 +88,10 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
         groupId: group.id,
         updatedAt: sql`CURRENT_TIMESTAMP`,
       })
-      .where(eq(linksTable.id, firstLinkRecord.id))
+      .where(eq(linksTable.id, linksFindByUrlResults[0].id))
       .returning({
         id: linksTable.id,
         url: linksTable.url,
-        createdAt: linksTable.createdAt,
         updatedAt: linksTable.updatedAt,
       }))[0]);
   }

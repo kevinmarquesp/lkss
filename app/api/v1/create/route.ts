@@ -29,8 +29,8 @@ async function POST(request: NextRequest, { params }: { params: Promise<PostPara
 
 /**
  * This route actually tries to find a record that already has the specified
- * URL before considering creating one. It even will restore a *dead* record
- * if it can be used instead of creating a new one.
+ * URL before considering creating one, other wise, a new URL entry will be
+ * created.
  */
 async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   params: PostParams;
@@ -40,8 +40,7 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   const linksFindByUrlResults = await db
     .select()
     .from(linksTable)
-    .where(eq(linksTable.url, props.body.url))
-    .orderBy(asc(linksTable.deletedAt));
+    .where(eq(linksTable.url, props.body.url));
 
   // Just create one if this URL wasn't already being used, other wise, search for it.
   if (linksFindByUrlResults.length === 0) {
@@ -54,26 +53,6 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
       .returning({
         id: linksTable.id,
         url: linksTable.url,
-        createdAt: linksTable.createdAt,
-        updatedAt: linksTable.updatedAt,
-      }))[0];
-  }
-
-  const firstLinkRecord = linksFindByUrlResults[0];
-
-  // Restore a dead record to not waste disk space if possible.
-  if (firstLinkRecord.deletedAt) {
-    return (await db
-      .update(linksTable)
-      .set({
-        updatedAt: sql`CURRENT_TIMESTAMP`,
-        deletedAt: null,
-      })
-      .where(eq(linksTable.id, firstLinkRecord.id))
-      .returning({
-        id: linksTable.id,
-        url: linksTable.url,
-        createdAt: linksTable.createdAt,
         updatedAt: linksTable.updatedAt,
       }))[0];
   }
@@ -81,11 +60,10 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   return (await db
     .update(linksTable)
     .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
-    .where(eq(linksTable.id, firstLinkRecord.id))
+    .where(eq(linksTable.id, linksFindByUrlResults[0].id))
     .returning({
       id: linksTable.id,
       url: linksTable.url,
-      createdAt: linksTable.createdAt,
       updatedAt: linksTable.updatedAt,
     }))[0];
 }

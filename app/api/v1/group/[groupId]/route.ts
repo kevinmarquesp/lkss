@@ -26,9 +26,7 @@ async function GET(request: NextRequest, { params }: { params: Promise<GetParams
 /**
  * It starts by checking if the group has any childs to begin with, then if
  * there is some child linked with the specified group it will return the
- * gorup data and each child's data as well. If the group has no *alive*
- * childs, it'll be marked as delted -- *dead* groups can be restored by the
- * user if he wants to.
+ * gorup data and each child's data as well.
  */
 async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;
@@ -38,14 +36,10 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
     .select({
       id: linksTable.id,
       url: linksTable.url,
-      createdAt: linksTable.createdAt,
       updatedAt: linksTable.updatedAt,
     })
     .from(linksTable)
-    .where(and(
-      eq(linksTable.groupId, props.params.groupId),
-      isNull(linksTable.deletedAt),
-    ));
+    .where(eq(linksTable.groupId, props.params.groupId));
 
   // If the group has no childs, then it should be deleted and say that it doesn't exists.
   if (linksFindByGroupParentIdResults.length === 0) {
@@ -56,10 +50,7 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
         updatedAt: sql`CURRENT_TIMESTAMP`,
       });
     await db
-      .update(groupsTable)
-      .set({
-        deletedAt: sql`CURRENT_TIMESTAMP`,
-      })
+      .delete(groupsTable)
       .where(eq(groupsTable.id, props.params.groupId));
 
     when(true).throw("Group ID not found").status(404);
@@ -70,13 +61,9 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
       id: groupsTable.id,
       title: groupsTable.title,
       updatedAt: groupsTable.updatedAt,
-      createdAt: groupsTable.createdAt,
     })
     .from(groupsTable)
-    .where(and(
-      eq(groupsTable.id, props.params.groupId),
-      isNull(groupsTable.deletedAt),
-    ));
+    .where(eq(groupsTable.id, props.params.groupId));
 
   console.log(groupsFindByIdResults);
 

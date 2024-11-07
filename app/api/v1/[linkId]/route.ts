@@ -25,9 +25,9 @@ async function GET(request: NextRequest, { params }: { params: Promise<GetParams
 
 /**
  * Given a link ID from the Next.js dynamic route parameters, it will just
- * return the relevant information about that link -- The `createdAt` and
- * `updatedAt` is useful for running some maintenance scripts if needed. A 404
- * error should be returned if any links was found with this particular ID.
+ * return the relevant information about that link -- The `updatedAt` propperty
+ * is useful for knowing which links are old and OK to delete after a while. A
+ * 404 error should be returned if any links was found with this particular ID.
  */
 async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;
@@ -37,14 +37,10 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
     .select({
       id: linksTable.id,
       url: linksTable.url,
-      createdAt: linksTable.createdAt,
       updatedAt: linksTable.updatedAt,
     })
     .from(linksTable)
-    .where(and(
-      eq(linksTable.id, props.params.linkId),
-      isNull(linksTable.deletedAt),
-    ));
+    .where(eq(linksTable.id, props.params.linkId));
 
   when(linksFindByIdResults.length === 0).throw("ID not found").status(404);
 
