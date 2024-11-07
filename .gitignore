@@ -42,3 +42,6 @@ next-env.d.ts
 # local turso
 local.db
 local.db-*
+
+# log files
+*.log
