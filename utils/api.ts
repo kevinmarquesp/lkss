@@ -22,6 +22,13 @@ async function routeHandler(location: string, runner: () => Promise<any>) {
   } catch (error) {
     // Each error handling part should be a simple if statement with some logic.
 
+    if (error instanceof ApiError) {
+      const status = error.status;
+      delete error.status;
+
+      return NextResponse.json({ error }, { status });
+    }
+
     console.log(`\n*** ${location} ***\n`);
     console.error(error);
 
@@ -32,13 +39,6 @@ async function routeHandler(location: string, runner: () => Promise<any>) {
           name: error.name,
         },
       }, { status: 400 });
-    }
-
-    if (error instanceof ApiError) {
-      const status = error.status;
-      delete error.status;
-
-      return NextResponse.json({ error }, { status });
     }
 
     if (error instanceof ZodError) {
