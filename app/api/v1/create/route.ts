@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { linksTable, publicLinkSchema } from "@/db/schema";
 import { serviceWrapper } from "@/utils/api";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
@@ -38,10 +38,10 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   body: PostBody;
 }) {
   const [existing] = await db
-    .select(publicLinkSchema)
-    .from(linksTable)
+    .update(linksTable)
+    .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
     .where(eq(linksTable.url, props.body.url))
-    .limit(1);
+    .returning(publicLinkSchema);
 
   if (existing) {
     return existing;
