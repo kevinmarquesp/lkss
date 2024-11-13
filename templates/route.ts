@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { routeHandler } from "@/utils/api";
+import { serviceWrapper } from "@/utils/api";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { NextRequest } from "next/server";
 import { z } from "zod";
@@ -13,7 +13,7 @@ type PostSearch = z.infer<typeof postSearchValidator>;
 type PostBody = z.infer<typeof postBodyValidator>;
 
 async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
-  return await routeHandler("POST /api/v1/user", async () => {
+  return await serviceWrapper("POST [[API ROUTE HERE!!!]]", async () => {
     return await executePost(request, db, {
       params: postParamsValidator.parse(await params),
       search: postSearchValidator.parse(request.nextUrl.searchParams),
@@ -42,7 +42,7 @@ async function executePost(request: NextRequest, db: LibSQLDatabase, props: {
 // type GetSearch = z.infer<typeof getSearchValidator>;
 
 // async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
-//   return await routeHandler("GET /api/v1/user", async () => {
+//   return await serviceWrapper("GET [[API ROUTE HERE!!!]]", async () => {
 //     return await executeGet(request, db, {
 //       params: getParamsValidator.parse(await params),
 //       search: getSearchValidator.parse(request.nextUrl.searchParams),
@@ -71,7 +71,7 @@ async function executePost(request: NextRequest, db: LibSQLDatabase, props: {
 // type PutBody = z.infer<typeof putBodyValidator>;
 
 // async function PUT(request: NextRequest, { params }: { params: Promise<PutParams> }) {
-//   return await routeHandler("PUT /api/v1/user", async () => {
+//   return await serviceWrapper("PUT [[API ROUTE HERE!!!]]", async () => {
 //     return await executePut(request, db, {
 //       params: putParamsValidator.parse(await params),
 //       search: putSearchValidator.parse(request.nextUrl.searchParams),
@@ -102,7 +102,7 @@ async function executePost(request: NextRequest, db: LibSQLDatabase, props: {
 // type DeleteBody = z.infer<typeof deleteBodyValidator>;
 
 // async function DELETE(request: NextRequest, { params }: { params: Promise<DeleteParams> }) {
-//   return await routeHandler("DELETE /api/v1/user", async () => {
+//   return await serviceWrapper("DELETE [[API ROUTE HERE!!!]]", async () => {
 //     return await executeDelete(request, db, {
 //       params: deleteParamsValidator.parse(await params),
 //       search: deleteSearchValidator.parse(request.nextUrl.searchParams),
