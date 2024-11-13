@@ -88,11 +88,11 @@ class SimulatorProps:
     db_file: str
     conn: sql.Connection
     curs: sql.Cursor
-    max_url_insertions: int = 10_000
-    max_noninserted_ids: int = 100
-    max_urls_per_group_insertions: int = 100  # My app is slow for now...
-    max_groups_insertions: int = 100
-    max_noninserted_groups: int = 100
+    max_url_insertions: int = 1_000
+    max_noninserted_ids: int = 1_000
+    max_urls_per_group_insertions: int = 1_000
+    max_groups_insertions: int = 1_000
+    max_noninserted_groups: int = 1_000
 
 
 # NOTE: Since the Simulator class has a lot of methods, they're separated into
