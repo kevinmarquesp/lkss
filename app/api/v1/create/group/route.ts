@@ -29,9 +29,9 @@ async function POST(request: NextRequest, { params }: { params: Promise<PostPara
 }
 
 /**
- * Creates a new group and generate an access token for future editings, each
- * child will pass through the same logic as the `/api/xxx/create` route --
- * it will reuse existing entries if `groupId` is `NULL`.
+ * It starts by fetching the already used links by the URL, then it batches the
+ * group creation query and the URL insertion/update queries depending if it
+ * was used or not -- Better than a slow `for` loop, you know.
  */
 async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   params: PostParams;

@@ -25,10 +25,9 @@ async function GET(request: NextRequest, { params }: { params: Promise<GetParams
 }
 
 /**
- * Given a link ID from the Next.js dynamic route parameters, it will just
- * return the relevant information about that link -- The `updatedAt` propperty
- * is useful for knowing which links are old and OK to delete after a while. A
- * 404 error should be returned if any links was found with this particular ID.
+ * Just query the database asking for the entry that maches the provided ID;
+ * If the ID was not found in the database, it should throw and "ID not found"
+ * error with a 404 status code.
  */
 async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;

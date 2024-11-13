@@ -28,9 +28,9 @@ async function POST(request: NextRequest, { params }: { params: Promise<PostPara
 }
 
 /**
- * This route actually tries to find a record that already has the specified
- * URL before considering creating one, other wise, a new URL entry will be
- * created.
+ * It returns the first ID and the URL that matches with the data input, if
+ * there is any links already inserted with that data, only then it will create
+ * a new record on the database.
  */
 async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   params: PostParams;

@@ -10,6 +10,9 @@ export const groupsTable = sqliteTable("Groups", {
   updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
 
+// NOTE: This public schema objects can be helpful in the select/returning
+// statements, to avoid writing so much of this object syntax.
+
 export const publicGroupsSchema = {
   id: groupsTable.id,
   title: groupsTable.title,

@@ -3,7 +3,9 @@ import { ZodError } from "zod";
 import { AssertionError } from "./assert";
 
 /**
- *
+ * Wrapper (or decorator, if you will) that returns a formated NextResponse
+ * object, the errors are also formated into a error response object. All the
+ * possible application errors can be found in the `catch` block.
  */
 async function serviceWrapper(location: string, runner: () => Promise<any>) {
   try {

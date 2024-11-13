@@ -25,9 +25,9 @@ async function GET(request: NextRequest, { params }: { params: Promise<GetParams
 }
 
 /**
- * It starts by checking if the group has any childs to begin with, then if
- * there is some child linked with the specified group it will return the
- * gorup data and each child's data as well.
+ * Uses a batch to asks the database for both the group public data (id and
+ * title) and its children at once, increasing performance. If any of those
+ * operations returned empty values, a 404 error should be throwed as well.
  */
 async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;
