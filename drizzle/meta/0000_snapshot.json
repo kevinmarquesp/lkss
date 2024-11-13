@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "06cfea1e-3d35-4879-aa01-0a0294f007c0",
+  "id": "cf41382c-a4b9-4c38-9309-1de96d137ad2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Groups": {
@@ -22,8 +22,15 @@
           "autoincrement": false,
           "default": "'Link groups'"
         },
-        "createdAt": {
-          "name": "createdAt",
+        "token": {
+          "name": "token",
+          "type": "text(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -36,6 +43,13 @@
           "name": "Groups_id_unique",
           "columns": [
             "id"
+          ],
+          "isUnique": true
+        },
+        "Groups_token_unique": {
+          "name": "Groups_token_unique",
+          "columns": [
+            "token"
           ],
           "isUnique": true
         }
@@ -62,15 +76,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "target": {
-          "name": "target",
+        "url": {
+          "name": "url",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "createdAt": {
-          "name": "createdAt",
+        "updatedAt": {
+          "name": "updatedAt",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,

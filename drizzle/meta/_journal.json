@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1730726894624,
-      "tag": "0000_steady_corsair",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1730815056726,
-      "tag": "0001_clever_karma",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1730820019830,
-      "tag": "0002_huge_war_machine",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1730821831916,
-      "tag": "0003_shallow_machine_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1730821956515,
-      "tag": "0004_perfect_terrax",
+      "when": 1731456755679,
+      "tag": "0000_right_amazoness",
       "breakpoints": true
     }
   ]
