@@ -1,7 +1,7 @@
 import { db } from "@/db";
-import { linksTable } from "@/db/schema";
+import { linksTable, publicLinkSchema } from "@/db/schema";
 import { routeHandler } from "@/utils/api";
-import { asc, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
@@ -18,7 +18,7 @@ type PostSearch = z.infer<typeof postSearchValidator>;
 type PostBody = z.infer<typeof postBodyValidator>;
 
 async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
-  return await routeHandler("POST /api/dev/create", async () => {
+  return await routeHandler("POST /api/v1/create", async () => {
     return await executePost(request, db, {
       params: postParamsValidator.parse(await params),
       search: postSearchValidator.parse(request.nextUrl.searchParams),
@@ -37,35 +37,22 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   search: PostSearch;
   body: PostBody;
 }) {
-  const linksFindByUrlResults = await db
-    .select()
+  const [existing] = await db
+    .select(publicLinkSchema)
     .from(linksTable)
-    .where(eq(linksTable.url, props.body.url));
+    .where(eq(linksTable.url, props.body.url))
+    .limit(1);
 
-  // Just create one if this URL wasn't already being used, other wise, search for it.
-  if (linksFindByUrlResults.length === 0) {
-    return (await db
-      .insert(linksTable)
-      .values({
-        id: nanoid(8),
-        url: props.body.url,
-      })
-      .returning({
-        id: linksTable.id,
-        url: linksTable.url,
-        updatedAt: linksTable.updatedAt,
-      }))[0];
+  if (existing) {
+    return existing;
   }
 
-  return (await db
-    .update(linksTable)
-    .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
-    .where(eq(linksTable.id, linksFindByUrlResults[0].id))
-    .returning({
-      id: linksTable.id,
-      url: linksTable.url,
-      updatedAt: linksTable.updatedAt,
-    }))[0];
+  const [created] = await db
+    .insert(linksTable)
+    .values({ id: nanoid(8), url: props.body.url })
+    .returning(publicLinkSchema);
+
+  return created;
 }
 
 export {

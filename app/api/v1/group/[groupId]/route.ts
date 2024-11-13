@@ -1,7 +1,8 @@
 import { db } from "@/db";
-import { groupsTable, linksTable } from "@/db/schema";
-import { routeHandler, when } from "@/utils/api";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { groupsTable, linksTable, publicGroupsSchema, publicLinkSchema } from "@/db/schema";
+import { routeHandler } from "@/utils/api";
+import { assert } from "@/utils/assert";
+import { eq, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { NextRequest } from "next/server";
 import { z } from "zod";
@@ -15,7 +16,7 @@ type GetParams = z.infer<typeof getParamsValidator>;
 type GetSearch = z.infer<typeof getSearchValidator>;
 
 async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
-  return await routeHandler("GET /api/dev/group/[groupId]", async () => {
+  return await routeHandler("GET /api/v1/group/[groupId]", async () => {
     return await executeGet(request, db, {
       params: getParamsValidator.parse(await params),
       search: getSearchValidator.parse(request.nextUrl.searchParams),
@@ -32,48 +33,26 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;
   search: GetSearch;
 }) {
-  const linksFindByGroupParentIdResults = await db
-    .select({
-      id: linksTable.id,
-      url: linksTable.url,
-      updatedAt: linksTable.updatedAt,
-    })
-    .from(linksTable)
-    .where(eq(linksTable.groupId, props.params.groupId));
-
-  // If the group has no childs, then it should be deleted and say that it doesn't exists.
-  if (linksFindByGroupParentIdResults.length === 0) {
-    await db
+  const results = await db.batch([
+    db
+      .select(publicGroupsSchema)
+      .from(groupsTable)
+      .where(eq(groupsTable.id, props.params.groupId)),
+    db
       .update(linksTable)
-      .set({
-        groupId: null,
-        updatedAt: sql`CURRENT_TIMESTAMP`,
-      });
-    await db
-      .delete(groupsTable)
-      .where(eq(groupsTable.id, props.params.groupId));
+      .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(eq(linksTable.groupId, props.params.groupId))
+      .returning(publicLinkSchema),
+  ]);
 
-    when(true).throw("Group ID not found").status(404);
-  }
+  const [group] = results.shift()!;
+  const children = results.map(([child]) => child);  // Flatern matrix.
 
-  const groupsFindByIdResults = await db
-    .select({
-      id: groupsTable.id,
-      title: groupsTable.title,
-      updatedAt: groupsTable.updatedAt,
-    })
-    .from(groupsTable)
-    .where(eq(groupsTable.id, props.params.groupId));
+  assert(!group || !children)
+    .message("Group ID not found")
+    .status(404);
 
-  console.log(groupsFindByIdResults);
-
-  when(groupsFindByIdResults.length === 0)
-    .throw("Group ID not found").status(404);
-
-  return {
-    ...groupsFindByIdResults[0],
-    children: linksFindByGroupParentIdResults,
-  };
+  return { ...group, children };
 }
 
 export {

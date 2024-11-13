@@ -1,7 +1,7 @@
 import { db } from "@/db";
-import { groupsTable, linksTable } from "@/db/schema";
+import { groupsTable, linksTable, publicLinkSchema } from "@/db/schema";
 import { routeHandler } from "@/utils/api";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
@@ -19,7 +19,7 @@ type PostSearch = z.infer<typeof postSearchValidator>;
 type PostBody = z.infer<typeof postBodyValidator>;
 
 async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
-  return await routeHandler("POST /api/dev/create/group", async () => {
+  return await routeHandler("POST /api/v1/create/group", async () => {
     return await executePost(request, db, {
       params: postParamsValidator.parse(await params),
       search: postSearchValidator.parse(request.nextUrl.searchParams),
@@ -38,65 +38,62 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
   search: PostSearch;
   body: PostBody;
 }) {
-  const group = (await db
-    .insert(groupsTable)
-    .values({
-      id: nanoid(8),
-      token: nanoid(12),
-      title: props.body.title,
-    })
-    .returning({
-      id: groupsTable.id,
-      title: groupsTable.title,
-      token: groupsTable.token,
-      updatedAt: groupsTable.updatedAt,
-    }))[0];
+  const groupId = nanoid(8);
 
-  let children = [];
+  const existingLinks = await db
+    .select({ id: linksTable.id, url: linksTable.url })
+    .from(linksTable)
+    .where(or(
+      ...props.body.children.map((child) =>
+        eq(linksTable.url, child)),
+    ));
 
-  // For each child URL, it should reuse alone records or create a new one for this group.
-  for (const childUrl of props.body.children) {
-    const linksFindByUrlResults = await db
-      .select()
-      .from(linksTable)
-      .where(and(
-        eq(linksTable.url, childUrl),
-        isNull(linksTable.groupId),
-      ));
-
-    // If any URL was found, create a new one and use it.
-    if (linksFindByUrlResults.length === 0) {
-      children.push((await db
-        .insert(linksTable)
-        .values({
-          id: nanoid(8),
-          url: childUrl,
-          groupId: group.id,
-        })
-        .returning({
-          id: linksTable.id,
-          url: linksTable.url,
-          updatedAt: linksTable.updatedAt,
-        }))[0]);
-
-      continue;
-    }
-
-    children.push((await db
-      .update(linksTable)
-      .set({
-        groupId: group.id,
-        updatedAt: sql`CURRENT_TIMESTAMP`,
+  const batchResults = await db.batch([
+    db
+      .insert(groupsTable)
+      .values({
+        id: groupId,
+        title: props.body.title,
+        token: nanoid(12),
       })
-      .where(eq(linksTable.id, linksFindByUrlResults[0].id))
-      .returning({
-        id: linksTable.id,
-        url: linksTable.url,
-        updatedAt: linksTable.updatedAt,
-      }))[0]);
-  }
+      .returning(),
+    ...getChildrenActions(),
+  ]);
+
+  const [group] = batchResults.shift()!;
+  const children = batchResults.map(([child]) => child);  // Flatern matrix.
 
   return { ...group, children };
+
+  /** Get the links insertion/updating actions for the group batching query. */
+  function getChildrenActions() {
+    const actions = [];
+
+    for (const { id } of existingLinks) {
+      const action = db
+        .update(linksTable)
+        .set({ groupId, updatedAt: sql`CURRENT_TIMESTAMP` })
+        .where(eq(linksTable.id, id))
+        .returning(publicLinkSchema);
+
+      actions.push(action);
+    }
+
+    const existingUrls = existingLinks.map(({ url }) => url);
+    const filteredChildren = props.body.children.filter((child) =>
+      !existingUrls.includes(child));
+
+    for (const url of filteredChildren) {
+      const action = db
+        .insert(linksTable)
+        .values({ id: nanoid(8), url })
+        .returning(publicLinkSchema);
+
+      actions.push(action);
+    }
+
+    return actions;
+  }
 }
 
 export {

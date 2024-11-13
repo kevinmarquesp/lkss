@@ -1,7 +1,8 @@
 import { db } from "@/db";
-import { linksTable } from "@/db/schema";
-import { routeHandler, when } from "@/utils/api";
-import { and, eq, isNull } from "drizzle-orm";
+import { linksTable, publicLinkSchema } from "@/db/schema";
+import { routeHandler } from "@/utils/api";
+import { assert } from "@/utils/assert";
+import { eq, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { NextRequest } from "next/server";
 import { z } from "zod";
@@ -15,7 +16,7 @@ type GetParams = z.infer<typeof getParamsValidator>;
 type GetSearch = z.infer<typeof getSearchValidator>;
 
 async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
-  return await routeHandler("GET /api/dev/[linkId]", async () => {
+  return await routeHandler("GET /api/v1/[linkId]", async () => {
     return await executeGet(request, db, {
       params: getParamsValidator.parse(await params),
       search: getSearchValidator.parse(request.nextUrl.searchParams),
@@ -33,18 +34,17 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
   params: GetParams;
   search: GetSearch;
 }) {
-  const linksFindByIdResults = await db
-    .select({
-      id: linksTable.id,
-      url: linksTable.url,
-      updatedAt: linksTable.updatedAt,
-    })
-    .from(linksTable)
-    .where(eq(linksTable.id, props.params.linkId));
+  const [result] = await db
+    .update(linksTable)
+    .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+    .where(eq(linksTable.id, props.params.linkId))
+    .returning(publicLinkSchema);
 
-  when(linksFindByIdResults.length === 0).throw("ID not found").status(404);
+  assert(!result)
+    .message("ID not found")
+    .status(404);
 
-  return linksFindByIdResults[0];
+  return result;
 }
 
 export {
