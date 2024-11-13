@@ -10,6 +10,12 @@ export const groupsTable = sqliteTable("Groups", {
   updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const publicGroupsSchema = {
+  id: groupsTable.id,
+  title: groupsTable.title,
+  updatedAt: groupsTable.updatedAt,
+};
+
 export const linksTable = sqliteTable("Links", {
   id: text({ length: 8 }).unique().notNull(),
   groupId: text({ length: 8 }).references(() => groupsTable.id),
@@ -20,3 +26,9 @@ export const linksTable = sqliteTable("Links", {
 export const insertLinksSchema = createInsertSchema(linksTable, {
   url: z.string().url(),
 });
+
+export const publicLinkSchema = {
+  id: linksTable.id,
+  url: linksTable.url,
+  updatedAt: linksTable.updatedAt,
+};
