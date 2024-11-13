@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { groupsTable, linksTable, publicGroupsSchema, publicLinkSchema } from "@/db/schema";
-import { routeHandler } from "@/utils/api";
+import { serviceWrapper } from "@/utils/api";
 import { assert } from "@/utils/assert";
 import { eq, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
@@ -16,7 +16,7 @@ type GetParams = z.infer<typeof getParamsValidator>;
 type GetSearch = z.infer<typeof getSearchValidator>;
 
 async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
-  return await routeHandler("GET /api/v1/group/[groupId]", async () => {
+  return await serviceWrapper("GET /api/v1/group/[groupId]", async () => {
     return await executeGet(request, db, {
       params: getParamsValidator.parse(await params),
       search: getSearchValidator.parse(request.nextUrl.searchParams),

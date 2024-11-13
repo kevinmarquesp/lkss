@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { groupsTable, linksTable, publicLinkSchema } from "@/db/schema";
-import { routeHandler } from "@/utils/api";
+import { serviceWrapper } from "@/utils/api";
 import { eq, or, sql } from "drizzle-orm";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { nanoid } from "nanoid";
@@ -19,7 +19,7 @@ type PostSearch = z.infer<typeof postSearchValidator>;
 type PostBody = z.infer<typeof postBodyValidator>;
 
 async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
-  return await routeHandler("POST /api/v1/create/group", async () => {
+  return await serviceWrapper("POST /api/v1/create/group", async () => {
     return await executePost(request, db, {
       params: postParamsValidator.parse(await params),
       search: postSearchValidator.parse(request.nextUrl.searchParams),
