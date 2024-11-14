@@ -17,7 +17,7 @@ type PostParams = z.infer<typeof postParamsValidator>;
 type PostSearch = z.infer<typeof postSearchValidator>;
 type PostBody = z.infer<typeof postBodyValidator>;
 
-async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<PostParams> }) {
   return await serviceWrapper("POST /api/v1/create", async () => {
     return await executePost(request, db, {
       params: postParamsValidator.parse(await params),
@@ -54,15 +54,3 @@ async function executePost(_request: NextRequest, db: LibSQLDatabase, props: {
 
   return created;
 }
-
-export {
-  postParamsValidator,
-  postSearchValidator,
-  postBodyValidator,
-  type PostParams,
-  type PostSearch,
-  type PostBody,
-  POST,
-  executePost,
-};
-

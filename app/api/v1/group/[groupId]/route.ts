@@ -15,7 +15,7 @@ const getSearchValidator = z.object({}).optional();
 type GetParams = z.infer<typeof getParamsValidator>;
 type GetSearch = z.infer<typeof getSearchValidator>;
 
-async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<GetParams> }) {
   return await serviceWrapper("GET /api/v1/group/[groupId]", async () => {
     return await executeGet(request, db, {
       params: getParamsValidator.parse(await params),
@@ -54,12 +54,3 @@ async function executeGet(_request: NextRequest, db: LibSQLDatabase, props: {
 
   return { ...group, children };
 }
-
-export {
-  getParamsValidator,
-  getSearchValidator,
-  type GetParams,
-  type GetSearch,
-  GET,
-  executeGet,
-};
