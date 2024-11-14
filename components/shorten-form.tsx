@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useShortner } from "@/hooks/use-shortner";
 import ShortUrlResult from "./short-url-result";
+import Spinner from "./spinner";
 
 const fieldsSchema = z.object({
   url: z.string().url("Invalid URL string"),
@@ -22,7 +23,6 @@ export default function ShortenForm() {
     url: string;
     updatedAt: string;
   }>();
-
   const {
     register,
     handleSubmit,
@@ -45,11 +45,7 @@ export default function ShortenForm() {
       <div className="mt-2">
         {loading && (
           <>
-            <div role="status" className="size-4 block mx-auto mt-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white">
-              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                Loading...
-              </span>
-            </div>
+            <Spinner className="size-4 mt-6 mx-auto" />
           </>
         )}
         {(result && !loading) && (
