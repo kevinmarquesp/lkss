@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LKSS",
+  title: "Stupid URL Shortner",
   description: "Link shortner with group feature.",
 };
 
