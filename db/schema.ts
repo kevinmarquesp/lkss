@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -10,6 +10,8 @@ export const groupsTable = sqliteTable("Groups", {
   updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
 
+export type GroupsTable = InferSelectModel<typeof groupsTable>;
+
 // NOTE: This public schema objects can be helpful in the select/returning
 // statements, to avoid writing so much of this object syntax.
 
@@ -19,12 +21,16 @@ export const publicGroupsSchema = {
   updatedAt: groupsTable.updatedAt,
 };
 
+export type PublicGroupsSchema = Pick<GroupsTable, keyof typeof publicGroupsSchema>;
+
 export const linksTable = sqliteTable("Links", {
   id: text({ length: 8 }).unique().notNull(),
   groupId: text({ length: 8 }).references(() => groupsTable.id),
   url: text().notNull(),
   updatedAt: integer({ mode: "timestamp_ms" }).default(sql`CURRENT_TIMESTAMP`),
 });
+
+export type LinksTable = InferSelectModel<typeof linksTable>;
 
 export const insertLinksSchema = createInsertSchema(linksTable, {
   url: z.string().url(),
@@ -35,3 +41,5 @@ export const publicLinkSchema = {
   url: linksTable.url,
   updatedAt: linksTable.updatedAt,
 };
+
+export type PublicLinksSchema = Pick<LinksTable, keyof typeof publicLinkSchema>;
