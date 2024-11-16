@@ -58,8 +58,19 @@ async function serviceWrapper(location: string, runner: () => Promise<any>) {
       }, { status: 500 });
     }
 
-    return NextResponse.json({ location, error }, { status: 500 });
+    return NextResponse.json({
+      location,
+      error: {
+        message: "Unknown error",
+        object: error,
+      },
+    }, { status: 500 });
   }
 }
 
-export { serviceWrapper };
+type ApiErrorResponse = { location: string; error: { message: string } };
+
+export {
+  serviceWrapper,
+  type ApiErrorResponse,
+};
