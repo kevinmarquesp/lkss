@@ -6,10 +6,15 @@ import { Input } from "./ui/input";
 import { Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect } from "react";
 import { useShortner } from "@/hooks/use-shortner";
 import ShortUrlResult from "./short-url-result";
 import Spinner from "./spinner";
+import { isType } from "@/utils/types";
+import { PublicLinksSchema } from "@/db/schema";
+import { toast } from "sonner";
+import { ApiErrorResponse } from "@/utils/api";
+import { capitalizeFirstLetter } from "@/utils/strings";
 
 const fieldsSchema = z.object({
   url: z.string().url("Invalid URL string"),
@@ -18,11 +23,7 @@ const fieldsSchema = z.object({
 type FieldsSchema = z.infer<typeof fieldsSchema>;
 
 export default function ShortenForm() {
-  const { shorten, loading, result } = useShortner<{
-    id: string;
-    url: string;
-    updatedAt: string;
-  }>();
+  const { shorten, loading, result, error } = useShortner();
   const {
     register,
     handleSubmit,
@@ -30,6 +31,17 @@ export default function ShortenForm() {
   } = useForm<FieldsSchema>({
     resolver: zodResolver(fieldsSchema),
   });
+
+  useEffect(() => {
+    if (isType<ApiErrorResponse>(result, ["error"])) {
+      toast("Short URL creation failed!", {
+        description: capitalizeFirstLetter(result.error.message),
+      });
+
+    } else if (error) {
+      toast("Something went wrong.");
+    }
+  }, [error, result]);
 
   return (
     <>
@@ -48,12 +60,12 @@ export default function ShortenForm() {
             <Spinner className="size-4 mt-6 mx-auto" />
           </>
         )}
-        {(result && !loading) && (
+        {(isType<PublicLinksSchema>(result, ["id", "url"]) && !loading) && (
           <>
             <ShortUrlResult id={result.id} url={result.url} />
           </>
         )}
-      </div>
+      </div >
     </>
   );
 }
