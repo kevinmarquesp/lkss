@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,12 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <body className={cn(
-        "min-h-screen bg-background font-sans antialiased",
+        "min-h-screen bg-black font-sans antialiased",
         inter.className,
       )}>
         <ThemeProvider enableSystem attribute="class" defaultTheme="dark">
           {children}
+          <Toaster position="bottom-center" />
         </ThemeProvider>
       </body>
     </html>

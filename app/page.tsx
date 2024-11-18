@@ -20,7 +20,7 @@ export default function Page() {
             <ShortenForm />
           </CardContent>
           <CardFooter className="text-sm text-zinc-600 flex gap-4">
-            <a href="https://github.com/kevinmarquesp/lkss" target="_blank" className="inline-flex items-center gap-1.5 hover:underline">
+            <a href="https://github.com/kevinmarquesp/sus" target="_blank" className="inline-flex items-center gap-1.5 hover:underline">
               <Code className="size-4 inline-block" />
               Source code
             </a>
